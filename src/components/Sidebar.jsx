@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { seekerLinks, providerLinks } from "./dashboard-navigation-links";
-import { useSelector } from "react-redux";
+// import { useSelector } from "react-redux";
 import { logout } from "../redux/user/userSlice";
 import { useDispatch } from "react-redux";
 import "../index.css";
@@ -11,9 +11,10 @@ const Sidebar = ({ onNavigate }) => {
   const dispatch = useDispatch();
   const hideHeader = location.pathname === "/";
 
-  const user = useSelector((state) => state.user.currentUser);
-  const userData = user?.userData || "Ganesh Gajelly";
-  const userType = user?.userType;
+  // const user = useSelector((state) => state.user.currentUser);
+
+  // const userType = user?.userType;
+  const userType = "serviceSeeker";
   const links = userType === "serviceSeeker" ? seekerLinks : providerLinks;
 
   const handleLogout = () => {
@@ -69,7 +70,7 @@ const Sidebar = ({ onNavigate }) => {
           ))}
         </ul>
       </div>
-      <div className="user-profile h-52 flex flex-col items-center justify-evenly">
+      {/* <div className="user-profile h-52 flex flex-col items-center justify-evenly">
         {userData &&
         userData.profilePicture &&
         userData.fullName &&
@@ -103,7 +104,7 @@ const Sidebar = ({ onNavigate }) => {
             Log out
           </button>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };

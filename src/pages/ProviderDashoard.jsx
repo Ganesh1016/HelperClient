@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
-const DashboardHome = () => {
+const ProviderDashboard = () => {
   const [tasks, setTasks] = useState([
     { id: 1, title: "Cleaning Request", dueDate: "2024-11-01" },
     { id: 2, title: "Maintenance Job", dueDate: "2024-11-05" },
@@ -92,4 +92,4 @@ const DashboardHome = () => {
   );
 };
 
-export default DashboardHome;
+export default ProviderDashboard;

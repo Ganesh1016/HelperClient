@@ -1,6 +1,6 @@
 const seekerLinks = [
   {
-    to: "/dashboard",
+    to: "/dashboard/seeker",
     label: "Dashboard",
     icon: <img src="/Dashboard-icon/dashboard-icon.svg" />,
   },
@@ -29,7 +29,7 @@ const seekerLinks = [
 
 const providerLinks = [
   {
-    to: "/dashboard/home",
+    to: "/dashboard/provider",
     label: "Dashboard",
     icon: <img src="/Dashboard-icon/dashboard-icon.svg" />,
   },
