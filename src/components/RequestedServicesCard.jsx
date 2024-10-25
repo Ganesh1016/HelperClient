@@ -72,7 +72,7 @@ const RequestedServicesCard = ({ serviceRequest }) => {
   };
 
   return (
-    <div className="border border-gray-200 w-full sm:w-[48%] lg:w-[30%] max-w-md h-[500px] m-3 mx-auto rounded-lg shadow-xl overflow-hidden bg-white">
+    <div className="border relative border-gray-200 w-full sm:w-[54%] lg:w-[30%] max-w-md sm:h-[450px] m-3 mx-auto rounded-lg shadow-xl overflow-hidden bg-white">
       {/* Hero Image */}
       <img
         src={heroImageUrl}
@@ -83,7 +83,7 @@ const RequestedServicesCard = ({ serviceRequest }) => {
       {/* Popover for Requester Info */}
       <Popover placement="bottom-start">
         <PopoverHandler>
-          <div className="flex items-center p-2 bg-gray-100 shadow-lg rounded-full cursor-pointer absolute top-2 left-2">
+          <div className="flex items-center p-2 bg-gray-100 opacity-90 shadow-lg rounded-full cursor-pointer absolute top-2 left-2">
             <span className="text-sm mr-2">Requested by</span>
             <img
               src="../../public/mypic.png"
@@ -102,9 +102,12 @@ const RequestedServicesCard = ({ serviceRequest }) => {
       </Popover>
 
       {/* Card Content */}
-      <div className="p-4 flex flex-col justify-between h-[270px]">
+      <div
+        className="p-4 flex flex-col justify-between h-fit"
+        // style={{ border: "2px solid black" }}
+      >
         {/* Service Title and Description */}
-        <div>
+        <div className="">
           <h3 className="font-semibold text-xl text-gray-900">
             {serviceTitle}
           </h3>
@@ -113,7 +116,7 @@ const RequestedServicesCard = ({ serviceRequest }) => {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex justify-between mt-4">
+        <div className="flex justify-between mt-8">
           <Button
             className="bg-primary text-white py-1 px-4 rounded-lg text-sm hover:bg-blue-700 transition duration-300 ease-in-out"
             onClick={toggleAcceptRequestModal}
