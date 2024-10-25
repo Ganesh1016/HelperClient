@@ -25,6 +25,7 @@ import ActiveServices from "./sections/ActiveServices";
 import { SelectedProviderProvider } from "./context/selectedProviderContext";
 import ServicesHistory from "./sections/ServicesHistory";
 import ContractorSignIn from "./pages/ContractorSignIn";
+import DashboardHome from "./pages/DashboardHome";
 
 const loadingMarkup = (
   <div className="py-4 text-center">
@@ -59,6 +60,7 @@ function App() {
               <Route path="/error" element={<ErrorPage />} />
               <Route path="/dashboard" element={<Dashboard />}>
                 <Route index element={<div>Welcome to the Dashboard!</div>} />
+                <Route path="/dashboard/home" element={<DashboardHome />} />
                 <Route
                   path="request-service"
                   element={<RaiseServiceRequest />}
