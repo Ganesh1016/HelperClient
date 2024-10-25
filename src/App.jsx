@@ -24,6 +24,7 @@ import BusinessPolicy from "./pages/BusinessPolicy";
 import ActiveServices from "./sections/ActiveServices";
 import { SelectedProviderProvider } from "./context/selectedProviderContext";
 import ServicesHistory from "./sections/ServicesHistory";
+import ContractorSignIn from "./pages/ContractorSignIn";
 
 const loadingMarkup = (
   <div className="py-4 text-center">
@@ -44,8 +45,11 @@ function App() {
               <Route path="/pricing" element={<Pricing />} />
               <Route path="/contactus" element={<ContactUs />} />
               <Route path="/businesspolicy" element={<BusinessPolicy />} />
-              <Route path="/findjob" element={<FindJob />} />
-              <Route path="/postjob" element={<PostJob />} />
+              <Route path="/sign-up">
+                <Route path="/sign-up/findjob" element={<FindJob />} />
+                <Route path="/sign-up/postjob" element={<PostJob />} />
+              </Route>
+              <Route path="/contractor" element={<ContractorSignIn />} />
               <Route path="/userform" element={<UserForm />} />
               <Route path="/signin" element={<SignIn />} />
               <Route path="/error" element={<ErrorPage />} />
