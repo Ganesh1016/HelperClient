@@ -15,55 +15,35 @@ import { useSelector } from "react-redux";
 
 const RequestedServicesCard = ({ serviceRequest }) => {
   const currentUser = useSelector((state) => state.user.currentUser);
-  const { _id: providerId } = currentUser.userData;
-  console.log(providerId);
+  const { _id: providerId } = currentUser.userData || "Ganesh Gajelly";
 
   const [openModal, setOpenModal] = useState(false);
-
-  const toggleAcceptRequestModal = () => {
-    setOpenModal(!openModal);
-  };
-
-  const {
-    serviceTitle,
-    serviceDescription,
-    servicePrice,
-    serviceType,
-    _id,
-    // seeker,
-    // createdAt,
-    // serviceStatus,
-  } = serviceRequest;
-
-  const [heroImageUrl, setHeroImageUrl] = useState("");
-  // State to manage the message input
   const [applicationMessage, setApplicationMessage] = useState("");
+  const [heroImageUrl, setHeroImageUrl] = useState("");
+
+  const { serviceTitle, serviceDescription, servicePrice, serviceType, _id } =
+    serviceRequest;
+
+  const toggleAcceptRequestModal = () => setOpenModal(!openModal);
 
   useEffect(() => {
     const fetchHeroImage = async () => {
       try {
-        // Use the serviceType to search for images related to the service
         const apiKey =
           "FHqFgsMVDtpd3nNhH11V4JdEb7dxBMiH7wmEleEI9LuifOD2jMTQLyrQ";
-        const apiUrl = "https://api.pexels.com/v1/search";
-
-        const response = await fetch(
-          `${apiUrl}?query=${serviceType}&orientation=landscape`,
-          {
-            headers: {
-              Authorization: apiKey,
-            },
-          }
-        );
+        const apiUrl = `https://api.pexels.com/v1/search?query=${serviceType}&orientation=landscape`;
+        const response = await fetch(apiUrl, {
+          headers: {
+            Authorization: apiKey,
+          },
+        });
 
         if (!response.ok) {
           throw new Error(`Error fetching hero image: ${response.statusText}`);
         }
 
         const data = await response.json();
-
-        // Choose the first image from the search results
-        if (data.photos && data.photos.length > 0) {
+        if (data.photos?.length > 0) {
           setHeroImageUrl(data.photos[0].src.large);
         }
       } catch (error) {
@@ -76,7 +56,6 @@ const RequestedServicesCard = ({ serviceRequest }) => {
 
   const applyToServiceRequest = async () => {
     try {
-      // Make POST request to the backend API
       const response = await axios.post(
         "http://localhost:3000/api/service-request/apply",
         {
@@ -85,121 +64,104 @@ const RequestedServicesCard = ({ serviceRequest }) => {
           message: applicationMessage,
         }
       );
-
       console.log("Application successful:", response.data);
-
-      // Close the modal
       setOpenModal(false);
-
-      // You can add further UI updates or notifications here if needed
     } catch (error) {
       console.error("Error applying to service request:", error);
-      // Handle error, show error message or retry logic
     }
   };
 
   return (
-    <div className="requested-services relative border border-darkPrimary w-[28%] h-[500px] m-3 mx-10 ml-0 rounded-xl">
+    <div className="border border-gray-200 w-full sm:w-[48%] lg:w-[30%] max-w-md h-[500px] m-3 mx-auto rounded-lg shadow-xl overflow-hidden bg-white">
+      {/* Hero Image */}
       <img
         src={heroImageUrl}
-        alt=""
-        className="rounded-xl h-[230px] w-full bg-cover"
+        alt="Service"
+        className="h-[230px] w-full object-cover rounded-t-lg"
       />
+
+      {/* Popover for Requester Info */}
       <Popover placement="bottom-start">
         <PopoverHandler>
-          <div
-            className="requested-by-container flex flex-row justify-evenly items-center w-[150px] h-[45px] bg-body bg-opacity-80 shadow-3xl rounded-full z-10 absolute top-2 left-2 cursor-pointer hover:bg-opacity-100"
-            data-popover-target="popover-user-profile"
-          >
-            <p className="text-[13px]">Requested by</p>
-            {/* Assuming seeker is the ID of the service requester */}
+          <div className="flex items-center p-2 bg-gray-100 shadow-lg rounded-full cursor-pointer absolute top-2 left-2">
+            <span className="text-sm mr-2">Requested by</span>
             <img
               src="../../public/mypic.png"
-              alt=""
-              className="h-[40px] rounded-full"
-              id="service-provider-profile-pic"
+              alt="Requested by"
+              className="w-10 h-10 rounded-full"
             />
           </div>
         </PopoverHandler>
         <PopoverContent>
-          <div className="service-provider-detail w-[160px] h-[70px] flex flex-col ">
-            <div className="name flex flex-row justify-evenly items-center">
-              <div className="container flex flex-col">
-                <h1 className=" font-bold">Ganesh Gajelly</h1>
-                <p className="">21, Male</p>
-              </div>
-              <img
-                src="../../public/mypic.png"
-                alt=""
-                className=" w-[40px] h-[40px] rounded-full"
-              />
-            </div>
-            <p>Mumbai</p>
-            <h4>Ratings ⭐⭐⭐⭐⭐</h4>
+          <div className="flex flex-col p-2 text-center">
+            <h1 className="font-semibold">Ganesh Gajelly</h1>
+            <p className="text-sm text-gray-600">Mumbai</p>
+            <p className="text-xs">Rating: ⭐⭐⭐⭐⭐</p>
           </div>
         </PopoverContent>
       </Popover>
-      <div className="service-title h-[30px] flex flex-row justify-between mt-1 px-2">
-        <p className="service-title font-bold">{serviceTitle}</p>
-        <p className="service-price">₹{servicePrice}/hr</p>
-      </div>
-      <div className="service-description text-sm overflow-y-auto p-2 h-[160px]">
-        {serviceDescription}
-      </div>
-      <div className="service-request-actions w-full h-[65px] flex flex-row justify-between items-center px-4">
-        <Button
-          className=" bg-primary py-2 px-4 rounded-lg text-[13px] font-poppins cursor-pointer !font-normal"
-          onClick={toggleAcceptRequestModal}
-        >
-          Accept Request
-        </Button>
-        <Dialog
-          open={openModal}
-          handler={toggleAcceptRequestModal}
-          className=""
-          animate={{
-            mount: { scale: 1, y: 0 },
-            unmount: { scale: 0.9, y: -100 },
-          }}
-        >
-          <DialogHeader className=" font-poppins">
-            ACCEPT THIS REQUEST?
-          </DialogHeader>
-          <DialogBody>
-            <h1 className=" font-poppins text-darkPrimary">
-              Write a short message, why they should hire you?
-            </h1>
-            <textarea
-              name="applicationMessage"
-              id=""
-              cols="70"
-              rows="4"
-              value={applicationMessage}
-              onChange={(e) => setApplicationMessage(e.target.value)}
-              className=" border-4 font-poppins text-black font-medium"
-            ></textarea>
-          </DialogBody>
-          <DialogFooter>
-            <Button
-              variant="text"
-              color="red"
-              onClick={toggleAcceptRequestModal}
-              className="mr-1"
-            >
-              <span>Cancel</span>
-            </Button>
-            <Button
-              variant="gradient"
-              color="green"
-              onClick={applyToServiceRequest}
-            >
-              <span>Confirm</span>
-            </Button>
-          </DialogFooter>
-        </Dialog>
-        <Button className=" bg-primary py-2 px-4 rounded-lg font-poppins text-[13px] cursor-pointer !font-normal">
-          Not interested
-        </Button>
+
+      {/* Card Content */}
+      <div className="p-4 flex flex-col justify-between h-[270px]">
+        {/* Service Title and Description */}
+        <div>
+          <h3 className="font-semibold text-xl text-gray-900">
+            {serviceTitle}
+          </h3>
+          <p className="text-gray-500 mt-1 text-lg">₹{servicePrice}/hr</p>
+          <p className="text-gray-700 mt-2 text-sm">{serviceDescription}</p>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex justify-between mt-4">
+          <Button
+            className="bg-primary text-white py-1 px-4 rounded-lg text-sm hover:bg-blue-700 transition duration-300 ease-in-out"
+            onClick={toggleAcceptRequestModal}
+          >
+            Accept
+          </Button>
+          <Dialog
+            open={openModal}
+            handler={toggleAcceptRequestModal}
+            animate={{
+              mount: { scale: 1, y: 0 },
+              unmount: { scale: 0.9, y: -100 },
+            }}
+          >
+            <DialogHeader>Accept This Request?</DialogHeader>
+            <DialogBody>
+              <p className="text-gray-700 mb-2">
+                Write a short message explaining why they should hire you:
+              </p>
+              <textarea
+                value={applicationMessage}
+                onChange={(e) => setApplicationMessage(e.target.value)}
+                rows="3"
+                className="w-full p-2 border border-gray-300 rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+            </DialogBody>
+            <DialogFooter>
+              <Button
+                variant="text"
+                color="red"
+                onClick={toggleAcceptRequestModal}
+                className="mr-1"
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="gradient"
+                color="green"
+                onClick={applyToServiceRequest}
+              >
+                Confirm
+              </Button>
+            </DialogFooter>
+          </Dialog>
+          <Button className=" bg-gray-500 text-sm px-4 rounded-lg hover:bg-gray-400 transition duration-300 ease-in-out">
+            Not Interested
+          </Button>
+        </div>
       </div>
     </div>
   );
@@ -210,12 +172,8 @@ RequestedServicesCard.propTypes = {
     serviceTitle: PropTypes.string.isRequired,
     serviceDescription: PropTypes.string.isRequired,
     servicePrice: PropTypes.number.isRequired,
-    seeker: PropTypes.string.isRequired,
-    createdAt: PropTypes.string.isRequired,
     serviceType: PropTypes.string.isRequired,
     _id: PropTypes.string.isRequired,
-    serviceStatus: PropTypes.string.isRequired,
-    // Add more fields as needed
   }).isRequired,
 };
 
