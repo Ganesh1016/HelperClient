@@ -42,6 +42,7 @@ const Header = () => {
     location.pathname === "/signin" ||
     location.pathname === "/dashboard" ||
     location.pathname === "/dashboard/service-history" ||
+    location.pathname === "/dashboard/home" ||
     location.pathname === "/dashboard/post-job" ||
     location.pathname === "/dashboard/search-job" ||
     location.pathname === "/dashboard/request-service" ||
