@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 
 const FindServices = () => {
   const currentUser = useSelector((state) => state.user.currentUser);
-  const { _id: providerId } = currentUser.userData;
+  const { _id: providerId } = currentUser.userData || "Ganesh Gajelly";
   console.log(providerId);
   const [serviceRequests, setServiceRequests] = useState([]);
 
