@@ -36,8 +36,9 @@ const Header = () => {
 
   const location = useLocation();
   const hideHeader =
-    location.pathname === "/postjob" ||
-    location.pathname === "/findjob" ||
+    location.pathname === "/sign-up/postjob" ||
+    location.pathname === "/sign-up/findjob" ||
+    location.pathname === "/sign-up/contractor" ||
     location.pathname === "/signin" ||
     location.pathname === "/dashboard" ||
     location.pathname === "/dashboard/service-history" ||
@@ -81,7 +82,7 @@ const Header = () => {
             </Link>
           ) : (
             <>
-              <Link to={"/postjob"}>
+              <Link to={"/sign-up/postjob"}>
                 <button
                   style={{ borderColor: "blue" }}
                   type="button"
@@ -90,12 +91,20 @@ const Header = () => {
                   {t("post-job")}
                 </button>
               </Link>
-              <Link to={"findjob"}>
+              <Link to={"/sign-up/findjob"}>
                 <button
                   type="button"
                   className="text-[#fff] font-ctabuttonfont bg-primary rounded-ctabutton hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium text-base px-4 py-2 text-center mr-3 md:mr-0 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 h-10 w-30  hidden md:block"
                 >
                   {t("find-job")}
+                </button>
+              </Link>
+              <Link to={"/sign-up/contractor"}>
+                <button
+                  type="button"
+                  className="text-[#fff] font-ctabuttonfont bg-primary rounded-ctabutton hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium text-base px-4 py-2 text-center mr-3 md:mr-0 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 h-10 w-30  hidden md:block mx-4"
+                >
+                  {t("find-helpers")}
                 </button>
               </Link>
             </>
@@ -144,7 +153,7 @@ const Header = () => {
             // style={{ border: "2px solid black" }}
           >
             <li>
-              <Link to={"/postjob"}>
+              <Link to={"/sign-up/postjob"}>
                 <button
                   style={{ borderColor: "blue" }}
                   type="button"
@@ -155,12 +164,22 @@ const Header = () => {
               </Link>
             </li>
             <li>
-              <Link to={"findjob"}>
+              <Link to={"/sign-up/findjob"}>
                 <button
                   type="button"
                   className="text-[#fff] font-ctabuttonfont bg-primary rounded-ctabutton hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium text-base px-4 py-2 text-center mr-3 md:mr-0 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 mt-3 h-10 w-30  md:hidden"
                 >
                   {t("find-job")}
+                </button>
+              </Link>
+            </li>
+            <li>
+              <Link to={"/sign-up/contractor"}>
+                <button
+                  type="button"
+                  className="text-[#fff] font-ctabuttonfont bg-primary rounded-ctabutton hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium text-base px-4 py-2 text-center mr-3 md:mr-0 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 mt-3 h-10 w-30  md:hidden"
+                >
+                  {t("find-helpers")}
                 </button>
               </Link>
             </li>

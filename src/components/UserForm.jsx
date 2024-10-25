@@ -1,8 +1,6 @@
 import { API_BASE_URL } from "../apiConfig";
 import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
 import { useState } from "react";
-// import { Button, Modal } from "flowbite-react";
-// import { HiOutlineExclamationCircle } from "react-icons/hi";
 import { useNavigate } from "react-router-dom";
 import { auth } from "../../firebase";
 import toast from "react-hot-toast";
@@ -13,11 +11,9 @@ const UserForm = () => {
   // const [openModal, setOpenModal] = useState(false);
   const [formData, setFormData] = useState({
     fullname: "",
-    email: "",
     age: "",
     gender: "",
     homeAddress: "",
-    profilePicture: "",
     serviceCategory: "",
     serviceLocation: "",
     availability: "",
@@ -113,13 +109,6 @@ const UserForm = () => {
       return; // Stop the function if the age contains non-numeric characters
     }
     // Additional validation for the phone number field
-    if (
-      name === "phoneNumber" &&
-      (!/^\d+$/.test(formData[name]) || value.length !== 10)
-    ) {
-      toast.error("Phone number should contain only 10 numerical characters.");
-      return; // Stop the function if the phone number contains non-numerical characters or is not 10 digits
-    }
   };
 
   // const appVerifier = window.recaptchaVerifier;
@@ -130,6 +119,7 @@ const UserForm = () => {
         "recaptcha-container",
         {
           "size ": "normal",
+          siteKey: "6LdMO2wqAAAAAD2wEBOE-0xFujlrL_H6Yg6FHyHH",
           callback: () => {},
           "expired-callback": () => {
             toast.error("reCAPTCHA response expired. Please solve it again.");
@@ -174,53 +164,53 @@ const UserForm = () => {
       });
   };
 
-  const saveFormDataToDatabase = async (formData) => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Construct additionalInfo based on userType
+    const additionalInfo =
+      formData.userType === "ServiceProvider"
+        ? {
+            serviceType: [formData.serviceCategory],
+            skills: [], // add this if you have input for skills
+            serviceLocation: formData.serviceLocation,
+            experience: formData.workExperience,
+            availability: formData.availability,
+            hourlyRate: formData.hourlyRate,
+            geolocation: { lat: 40.7128, lng: -74.006 }, // Placeholder, add geolocation if available
+          }
+        : {};
+
+    // Prepare final payload
+    const payload = {
+      userType: formData.userType,
+      fullname: formData.fullname,
+      age: parseInt(formData.age),
+      gender: formData.gender,
+      homeAddress: formData.homeAddress,
+      phoneNumber: formData.phoneNumber,
+      additionalInfo,
+    };
+
     try {
-      const fileData = new FormData();
-      fileData.append("profilePicture", formData.profilePicture);
-
-      const uploadResponse = await fetch(`${API_BASE_URL}/upload`, {
-        method: "POST",
-        body: fileData,
-      });
-
-      if (!uploadResponse.ok) {
-        throw new Error(`File upload failed! Status ${uploadResponse.status}`);
-      }
-
-      const { fileUrl } = await uploadResponse.json();
-
-      const updatedFormData = { ...formData, profilePicture: fileUrl };
-
-      const saveResponse = await fetch(`${API_BASE_URL}/save-providers`, {
+      const response = await fetch(`${API_BASE_URL}/u/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(updatedFormData),
+        body: JSON.stringify(payload),
       });
 
-      if (!saveResponse.ok) {
-        throw new Error(`Data save failed! Status ${saveResponse.status}`);
+      if (response.ok) {
+        toast.success("Registration successful!");
+        navigate("/dashboard");
+      } else {
+        throw new Error("Registration failed");
       }
-
-      console.log("Saved data successfully!");
-      toast.success("Your data was saved successfully!");
     } catch (error) {
-      toast.error("Something went wrong.");
-      navigate("/error");
-      console.log(error);
+      toast.error("An error occurred. Please try again.");
+      console.error("Error in registration:", error);
     }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    // toast.success("Your data was saved successfully.");
-    await saveFormDataToDatabase(formData);
-    console.log("(Mongo) Form submitted:", formData);
-    // setOpenModal(true);
-
-    // navigate("/signin");
   };
 
   const renderFormStep = () => {

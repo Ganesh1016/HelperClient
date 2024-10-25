@@ -47,9 +47,13 @@ function App() {
               <Route path="/businesspolicy" element={<BusinessPolicy />} />
               <Route path="/sign-up">
                 <Route path="/sign-up/findjob" element={<FindJob />} />
-                <Route path="/sign-up/postjob" element={<PostJob />} />
+                <Route path="/sign-up/postjob" element={<PostJob />} />{" "}
+                <Route
+                  path="/sign-up/contractor"
+                  element={<ContractorSignIn />}
+                />
               </Route>
-              <Route path="/contractor" element={<ContractorSignIn />} />
+
               <Route path="/userform" element={<UserForm />} />
               <Route path="/signin" element={<SignIn />} />
               <Route path="/error" element={<ErrorPage />} />

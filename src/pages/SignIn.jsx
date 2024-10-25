@@ -267,7 +267,7 @@ const SignIn = () => {
     >
       <div
         className="wrapper w-5/6 h-3/6 flex flex-col items-center justify-center md:max-w-2xl md:h-5/6"
-        style={{ border: "2px solid black" }}
+        // style={{ border: "2px solid black" }}
       >
         <h1 className="text-2xl font-semibold ">Sign In to your account</h1>
         <p className="text-sm font-medium text-lightText w-4/5 text-center py-2">
@@ -275,12 +275,12 @@ const SignIn = () => {
         </p>
         <div
           className="container w-5/6 h-3/6 md:w-5/6 md:h-3/6"
-          style={{ border: "2px solid black" }}
+          // style={{ border: "2px solid black" }}
         >
           <form
             action=""
             className="w-full h-full flex flex-col items-center justify-center"
-            style={{ border: "2px solid black" }}
+            // style={{ border: "2px solid black" }}
           >
             <div
               className="otp-verification flex flex-wrap flex-col items-center justify-center mt-10"
@@ -375,8 +375,8 @@ const SignIn = () => {
             </div>
           </form>
         </div>
-        <h4 className=" pt-2">
-          Dont have an account yet?{" "}
+        <h4 className=" pt-2 text-center">
+          Dont have an account yet? <br />
           <Link to={"/findjob"}>
             <span className=" text-primary font-semibold cursor-pointer">
               <u>Create an account.</u>
