@@ -46,4 +46,17 @@ const providerLinks = [
   // Add other provider-specific links
 ];
 
-export { seekerLinks, providerLinks };
+const contractorLinks = [
+  {
+    to: "/dashboard/contractor",
+    label: "Dashboard",
+    icon: <img src="/Dashboard-icon/dashboard-icon.svg" />,
+  },
+  {
+    to: "/dashboard/applicants",
+    label: "Applicants",
+    icon: <img src="/Dashboard-icon/job-icon.svg" />,
+  },
+];
+
+export { seekerLinks, providerLinks, contractorLinks };

@@ -1,5 +1,9 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { seekerLinks, providerLinks } from "./dashboard-navigation-links";
+import {
+  seekerLinks,
+  providerLinks,
+  contractorLinks,
+} from "./dashboard-navigation-links";
 // import { useSelector } from "react-redux";
 import { logout } from "../redux/user/userSlice";
 import { useDispatch } from "react-redux";
@@ -14,8 +18,13 @@ const Sidebar = ({ onNavigate }) => {
   // const user = useSelector((state) => state.user.currentUser);
 
   // const userType = user?.userType;
-  const userType = "serviceSeeker";
-  const links = userType === "serviceSeeker" ? seekerLinks : providerLinks;
+  const userType = "contractor"; // Assuming this is dynamically set
+  const links =
+    userType === "serviceSeeker"
+      ? seekerLinks
+      : userType === "serviceProvider"
+      ? providerLinks
+      : contractorLinks; // Fallback to contractorLinks for contractor user type
 
   const handleLogout = () => {
     dispatch(logout());

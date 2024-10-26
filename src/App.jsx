@@ -27,6 +27,7 @@ import ServicesHistory from "./sections/ServicesHistory";
 import ContractorSignIn from "./pages/ContractorSignIn";
 import ProviderDashboard from "./pages/ProviderDashoard";
 import SeekerDashboard from "./pages/SeekerDashboard";
+import ContractorDashboard from "./pages/ContractorDashboard";
 
 const loadingMarkup = (
   <div className="py-4 text-center">
@@ -66,6 +67,10 @@ function App() {
                   element={<ProviderDashboard />}
                 />
                 <Route path="/dashboard/seeker" element={<SeekerDashboard />} />
+                <Route
+                  path="/dashboard/contractor"
+                  element={<ContractorDashboard />}
+                />
                 <Route
                   path="request-service"
                   element={<RaiseServiceRequest />}
