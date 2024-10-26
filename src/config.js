@@ -1,7 +1,6 @@
 export const dummyProviders = [
   {
     _id: "1",
-    profilePicture: "https://via.placeholder.com/100",
     name: "Alice Johnson",
     gender: "Female",
     rating: 5,
@@ -18,7 +17,6 @@ export const dummyProviders = [
   },
   {
     _id: "2",
-    profilePicture: "https://via.placeholder.com/100",
     name: "John Doe",
     gender: "Male",
     rating: 4,
@@ -35,7 +33,6 @@ export const dummyProviders = [
   },
   {
     _id: "3",
-    profilePicture: "https://via.placeholder.com/100",
     name: "Maria Lopez",
     gender: "Female",
     rating: 3,
@@ -52,7 +49,6 @@ export const dummyProviders = [
   },
   {
     _id: "4",
-    profilePicture: "https://via.placeholder.com/100",
     name: "David Smith",
     gender: "Male",
     rating: 4,
@@ -69,7 +65,6 @@ export const dummyProviders = [
   },
   {
     _id: "5",
-    profilePicture: "https://via.placeholder.com/100",
     name: "Sophia Brown",
     gender: "Female",
     rating: 5,
@@ -86,7 +81,6 @@ export const dummyProviders = [
   },
   {
     _id: "6",
-    profilePicture: "https://via.placeholder.com/100",
     name: "Michael Garcia",
     gender: "Male",
     rating: 2,
@@ -103,7 +97,6 @@ export const dummyProviders = [
   },
   {
     _id: "7",
-    profilePicture: "https://via.placeholder.com/100",
     name: "Emily Davis",
     gender: "Female",
     rating: 4,
@@ -120,7 +113,6 @@ export const dummyProviders = [
   },
   {
     _id: "8",
-    profilePicture: "https://via.placeholder.com/100",
     name: "Chris Martinez",
     gender: "Male",
     rating: 3,
@@ -137,7 +129,6 @@ export const dummyProviders = [
   },
   {
     _id: "9",
-    profilePicture: "https://via.placeholder.com/100",
     name: "Jessica Lee",
     gender: "Female",
     rating: 5,
@@ -154,7 +145,6 @@ export const dummyProviders = [
   },
   {
     _id: "10",
-    profilePicture: "https://via.placeholder.com/100",
     name: "Robert Wilson",
     gender: "Male",
     rating: 4,
