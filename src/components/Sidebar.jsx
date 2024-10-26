@@ -18,7 +18,7 @@ const Sidebar = ({ onNavigate }) => {
   // const user = useSelector((state) => state.user.currentUser);
 
   // const userType = user?.userType;
-  const userType = "contractor"; // Assuming this is dynamically set
+  const userType = "serviceSeeker"; // Assuming this is dynamically set
   const links =
     userType === "serviceSeeker"
       ? seekerLinks

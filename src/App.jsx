@@ -1,6 +1,6 @@
 // App.js
 // import { useEffect, useState } from "react";
-import { Suspense } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 // import { useSelector } from "react-redux";
@@ -29,6 +29,7 @@ import ProviderDashboard from "./pages/ProviderDashoard";
 import SeekerDashboard from "./pages/SeekerDashboard";
 import ContractorDashboard from "./pages/ContractorDashboard";
 import ContractApplicants from "./pages/ContractApplicants";
+import DesktopRestrictionModal from "./components/DesktopRestrictionModal ";
 
 const loadingMarkup = (
   <div className="py-4 text-center">
@@ -37,12 +38,33 @@ const loadingMarkup = (
 );
 
 function App() {
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  useEffect(() => {
+    const checkDeviceType = () => {
+      setIsDesktop(window.innerWidth > 768);
+    };
+
+    // Check on initial load
+    checkDeviceType();
+
+    // Add event listener for window resize
+    window.addEventListener("resize", checkDeviceType);
+
+    // Cleanup
+    return () => window.removeEventListener("resize", checkDeviceType);
+  }, []);
+
+  if (isDesktop) {
+    return <DesktopRestrictionModal />;
+  }
   return (
     <BrowserRouter>
       <Suspense fallback={loadingMarkup}>
         <SelectedProviderProvider>
           <div className="app bg-body flex flex-col justify-center" id="app">
             <Header />
+
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/about" element={<About />} />
