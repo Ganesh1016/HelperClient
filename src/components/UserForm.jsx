@@ -1,20 +1,20 @@
 import { API_BASE_URL } from "../apiConfig";
-import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { auth } from "../../firebase";
 import toast from "react-hot-toast";
+import axios from "axios";
 
 const UserForm = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
-  // const [openModal, setOpenModal] = useState(false);
+  const [selectedSkills, setSelectedSkills] = useState([]);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
   const [formData, setFormData] = useState({
     fullname: "",
     age: "",
     gender: "",
     homeAddress: "",
-    serviceCategory: "",
     serviceLocation: "",
     availability: "",
     hourlyRate: "",
@@ -22,51 +22,12 @@ const UserForm = () => {
     countryCode: "+91",
     phoneNumber: "",
     otp: "",
+    userType: "ServiceProvider",
+    skills: [], // Assuming this is an array of skills
   });
 
-  const getFieldsForStep = (step) => {
-    switch (step) {
-      case 1:
-        return [
-          "fullname",
-          "email",
-          "gender",
-          "age",
-          "homeAddress",
-          "profilePicture",
-        ];
-      case 2:
-        return [
-          "serviceCategory",
-          "serviceLocation",
-          "availability",
-          "hourlyRate",
-          "workExperience",
-        ];
-      case 3:
-        return ["phoneNumber", "otp"];
-      default:
-        return [];
-    }
-  };
-
-  const handleNext = () => {
-    // const currentStepFields = getFieldsForStep(currentStep);
-    // // const { name, value } = e.target;
-    // for (const field of currentStepFields) {
-    //   if (!formData[field]) {
-    //     // Display an error message or take appropriate action
-    //     toast.error(`Please fill in the ${field} field before proceeding.`);
-    //     return; // Stop the function if any required field is missing
-    //   }
-    // }
-
-    setCurrentStep(currentStep + 1);
-  };
-
-  const handlePrev = () => {
-    setCurrentStep(currentStep - 1);
-  };
+  const handleNext = () => setCurrentStep((prev) => prev + 1);
+  const handlePrev = () => setCurrentStep((prev) => prev - 1);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -74,134 +35,63 @@ const UserForm = () => {
       ...prevData,
       [name]: value,
     }));
-    // Additional validation for the fullname field (allowing spaces)
-    if (name === "fullname" && !/^[a-zA-Z\s]+$/.test(formData[name])) {
-      toast.error("Full name should contain only letters and spaces.");
-      return; // Stop the function if the fullname contains other characters
-    }
-    // Additional validation for the email field
-    if (name === "email" && !/^\S+@\S+\.\S+$/.test(formData[name])) {
-      toast.error("Please enter a valid email address.");
-      return; // Stop the function if the email format is invalid
-    }
-    // Additional validation for the age field (allowing only numbers)
-    if (name === "age" && !/^\d*$/.test(value)) {
-      toast.error("Age should contain only numerical digits.");
-      return; // Stop the function if the age contains non-numeric characters
-    }
-    if (name === "hourlyRate" && !/^\d*$/.test(value)) {
-      toast.error("Please share only number of hours.");
-      return; // Stop the function if the age contains non-numeric characters
-    }
-    // Additional validation for the serviceLocation field (allowing spaces)
-    if (name === "serviceLocation" && !/^[a-zA-Z\s]+$/.test(formData[name])) {
-      toast.error("Please share only letters and spaces.");
-      return; // Stop the function if the serviceLocation contains other characters
-    }
-    if (name === "workExperience" && !/^\d*$/.test(value)) {
-      toast.error("Please share only number of years of work experience.");
-      return; // Stop the function if the work experience contains non-numeric characters
-    }
-    if (name === "availability" && !/^\d*$/.test(value)) {
-      toast.error(
-        "Please share only number of hours you are available to work in a day."
-      );
-      return; // Stop the function if the age contains non-numeric characters
-    }
-    // Additional validation for the phone number field
   };
 
-  // const appVerifier = window.recaptchaVerifier;
+  // handleSkillToggle function to manage skills array
+  const handleSkillToggle = (skill) => {
+    setSelectedSkills((prevSkills) =>
+      prevSkills.includes(skill)
+        ? prevSkills.filter((s) => s !== skill)
+        : [...prevSkills, skill]
+    );
+  };
+
+  // Updated sendOtp function using axios
   const sendOtp = async () => {
     try {
-      const recaptchaVerifier = new RecaptchaVerifier(
-        auth,
-        "recaptcha-container",
-        {
-          "size ": "normal",
-          siteKey: "6LdMO2wqAAAAAD2wEBOE-0xFujlrL_H6Yg6FHyHH",
-          callback: () => {},
-          "expired-callback": () => {
-            toast.error("reCAPTCHA response expired. Please solve it again.");
-          },
-        }
-      );
-      recaptchaVerifier.render();
-      return signInWithPhoneNumber(
-        auth,
-        `${formData.countryCode}${formData.phoneNumber}`,
-        recaptchaVerifier
-      )
-        .then((confirmationResult) => {
-          window.confirmationResult = confirmationResult;
-        })
-        .catch((error) => {
-          console.error("Cannot send SMS", error);
-          toast.error("Cannot send SMS", error);
-        });
-    } catch (error) {
-      console.log(error);
-    }
-
-    console.log(`${formData.countryCode}${formData.phoneNumber}`);
-  };
-
-  const verifyOtp = async () => {
-    window.confirmationResult
-      .confirm(formData.otp)
-      .then((result) => {
-        // User signed in successfully
-        const user = result.user;
-        toast.success("OTP matched!");
-        console.log("(Firebase) User signed in successfully:", user);
-        // Additional actions after successful sign-in
-      })
-      .catch((error) => {
-        // User couldn't sign in (bad verification code?)
-        toast.error("Incorrect OTP");
-        console.error("Incorrect OTP");
-        console.error("Error verifying OTP:", error);
+      const response = await axios.post(`${API_BASE_URL}/user/send-otp`, {
+        userType: formData.userType,
+        phoneNumber: formData.phoneNumber,
       });
+
+      if (response.status === 200) {
+        toast.success("OTP sent successfully!");
+        console.log(formData);
+      } else {
+        throw new Error("OTP sending failed");
+      }
+    } catch (error) {
+      toast.error("Cannot send OTP");
+      console.error("Error sending OTP:", error);
+    }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    // Construct additionalInfo based on userType
-    const additionalInfo =
-      formData.userType === "ServiceProvider"
-        ? {
-            serviceType: [formData.serviceCategory],
-            skills: [], // add this if you have input for skills
-            serviceLocation: formData.serviceLocation,
-            experience: formData.workExperience,
-            availability: formData.availability,
-            hourlyRate: formData.hourlyRate,
-            geolocation: { lat: 40.7128, lng: -74.006 }, // Placeholder, add geolocation if available
-          }
-        : {};
-
-    // Prepare final payload
+  // Updated verifyOtp function using axios
+  // Updated verifyOtp function using axios
+  const verifyOtp = async () => {
     const payload = {
+      phoneNumber: formData.phoneNumber,
+      otp: parseInt(formData.otp),
       userType: formData.userType,
       fullname: formData.fullname,
       age: parseInt(formData.age),
       gender: formData.gender,
       homeAddress: formData.homeAddress,
-      phoneNumber: formData.phoneNumber,
-      additionalInfo,
+      serviceAddress: formData.serviceLocation,
+      experience: parseInt(formData.workExperience),
+      availability: parseInt(formData.availability),
+      hourlyRate: parseInt(formData.hourlyRate),
+      serviceType: formData.serviceCategory,
+      skills: selectedSkills, // Pass selected skills array
     };
 
     try {
-      const response = await fetch(`${API_BASE_URL}/u/register`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
+      const response = await axios.post(
+        `${API_BASE_URL}/user/register`,
+        payload
+      );
 
-      if (response.ok) {
+      if (response.status === 201) {
         toast.success("Registration successful!");
         navigate("/dashboard");
       } else {
@@ -224,64 +114,53 @@ const UserForm = () => {
                 <input
                   type="text"
                   name="fullname"
-                  className="border border-lightText rounded-lg focus:border-primary focus:border-2 block w-full sm:w-[400px] md:w-[500px] lg:w-[600px] p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 outline-none h-12"
+                  className="border border-lightText rounded-lg focus:border-primary focus:border-2 block w-full p-2.5 outline-none h-12"
                   placeholder="Full Name"
                   value={formData.fullname}
                   onChange={handleChange}
                 />
               </label>
-              <br />
               <label>
                 <input
                   type="text"
                   name="age"
-                  className="border border-lightText rounded-lg focus:border-primary focus:border-2 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 outline-none h-12"
+                  className="border border-lightText rounded-lg focus:border-primary focus:border-2 block w-full p-2.5 outline-none h-12"
                   placeholder="Age"
                   value={formData.age}
                   onChange={handleChange}
                 />
               </label>
-              <br />
               <label>
                 <textarea
                   name="homeAddress"
-                  className="border border-lightText rounded-lg focus:border-primary focus:border-2 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 outline-none h-24 resize-none"
+                  className="border border-lightText rounded-lg focus:border-primary focus:border-2 block w-full p-2.5 outline-none h-24 resize-none"
                   placeholder="Home Address"
                   value={formData.homeAddress}
                   onChange={handleChange}
                 />
               </label>
             </div>
-
-            {/* Column 2 */}
-            <div className="w-full md:w-1/2 p-2 flex flex-col">
+            <div className="w-full md:w-1/2 p-2">
               <label className="w-full">
                 <select
                   name="gender"
-                  className="border border-lightText rounded-lg focus:border-primary focus:border-2 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 outline-none h-12"
+                  className="border border-lightText rounded-lg focus:border-primary focus:border-2 block w-full p-2.5 outline-none h-12"
                   value={formData.gender}
                   onChange={handleChange}
                 >
                   <option value="" disabled>
                     Select Gender
                   </option>
-                  <option value="Male">Male</option>
-                  <option value="Female">Female</option>
-                  <option value="Others">Others</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                  <option value="others">Others</option>
                 </select>
               </label>
-
-              {/* Next Button */}
               <div
                 className="mt-4 self-end w-28 h-10 bg-primary rounded-lg flex items-center justify-center cursor-pointer"
                 onClick={handleNext}
               >
                 <button className="text-white">Next</button>
-                <img
-                  src="/icons/next.svg"
-                  alt="Next"
-                  className="w-4 h-4 ml-2"
-                />
               </div>
             </div>
           </div>
@@ -290,136 +169,107 @@ const UserForm = () => {
       case 2:
         return (
           <div className="professional-details flex flex-wrap w-full gap-4 p-4">
-            {/* Column 1 */}
             <div className="w-full md:w-1/2 p-2">
-              <label className="block mb-4">
-                <select
-                  name="serviceCategory"
-                  className="border border-lightText rounded-lg focus:border-primary focus:border-2 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 outline-none h-12"
-                  value={formData.serviceCategory}
-                  onChange={handleChange}
+              <label className="block mb-4 relative">
+                <div
+                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                  className="border border-lightText rounded-lg focus:border-primary focus:border-2 p-2.5 outline-none h-auto cursor-pointer"
                 >
-                  <option value="" disabled>
+                  <span className="block mb-2 text-gray-600">
                     Select Service Category
-                  </option>
-                  <option value="Maid">Maid</option>
-                  <option value="Cook">Cook</option>
-                </select>
-              </label>
+                  </span>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedSkills.length > 0 ? (
+                      selectedSkills.map((skill, index) => (
+                        <span
+                          key={index}
+                          className="bg-blue-100 text-blue-600 rounded-full px-2 py-1 text-sm"
+                        >
+                          {skill}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-gray-400">
+                        Click to select categories
+                      </span>
+                    )}
+                  </div>
+                </div>
 
+                {dropdownOpen && (
+                  <div className="absolute top-full left-0 mt-2 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+                    {["Maid", "Cook", "Driver", "Gardener"].map((option) => (
+                      <label
+                        key={option}
+                        className="flex items-center px-3 py-2 hover:bg-gray-100 cursor-pointer"
+                      >
+                        <input
+                          type="checkbox"
+                          className="mr-2"
+                          checked={selectedSkills.includes(option)}
+                          onChange={() => handleSkillToggle(option)}
+                        />
+                        {option}
+                      </label>
+                    ))}
+                  </div>
+                )}
+              </label>
               <label className="block mb-4">
                 <input
                   type="text"
                   name="serviceLocation"
-                  className="border border-lightText rounded-lg focus:border-primary focus:border-2 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 outline-none h-12"
+                  className="border border-lightText rounded-lg focus:border-primary focus:border-2 block w-full p-2.5 outline-none h-12"
                   value={formData.serviceLocation}
                   onChange={handleChange}
-                  placeholder="Service Location:"
+                  placeholder="Service Location"
                 />
               </label>
-
               <label className="block mb-4">
                 <input
                   type="text"
                   name="availability"
-                  className="border border-lightText rounded-lg focus:border-primary focus:border-2 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 outline-none h-12"
+                  className="border border-lightText rounded-lg focus:border-primary focus:border-2 block w-full p-2.5 outline-none h-12"
                   value={formData.availability}
                   onChange={handleChange}
-                  placeholder="Availability (e.g., 3 hours/day):"
+                  placeholder="Share you availaibility"
                 />
               </label>
             </div>
-
-            {/* Column 2 */}
             <div className="w-full md:w-1/2 p-2">
               <label className="block mb-4">
                 <input
                   type="text"
                   name="hourlyRate"
-                  className="border border-lightText rounded-lg focus:border-primary focus:border-2 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 outline-none h-12"
+                  className="border border-lightText rounded-lg focus:border-primary focus:border-2 block w-full p-2.5 outline-none h-12"
                   value={formData.hourlyRate}
                   onChange={handleChange}
-                  placeholder="Hourly Rate (e.g., Rs.200):"
+                  placeholder="Hourly Rate"
                 />
               </label>
-
               <label className="block mb-4">
                 <input
                   type="text"
                   name="workExperience"
-                  className="border border-lightText rounded-lg focus:border-primary focus:border-2 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 outline-none h-12"
+                  className="border border-lightText rounded-lg focus:border-primary focus:border-2 block w-full p-2.5 outline-none h-12"
                   value={formData.workExperience}
                   onChange={handleChange}
-                  placeholder="Work Experience (e.g., 2 years):"
+                  placeholder="Work Experience"
                 />
               </label>
             </div>
-
-            {/* Buttons Container */}
             <div className="flex justify-between w-full mt-4">
               <div
                 className="bg-primary w-24 md:w-28 h-10 rounded-lg flex items-center justify-center cursor-pointer"
                 onClick={handlePrev}
               >
-                <button className="text-white flex items-center gap-2">
-                  <svg
-                    id="prev-icon"
-                    width="7px"
-                    height="12px"
-                    viewBox="0 0 7 12"
-                    version="1.1"
-                    xmlns="http://www.w3.org/2000/svg"
-                    style={{ transform: "" }}
-                  >
-                    <title>navigate_next</title>
-                    <desc>Created with Sketch.</desc>
-                    <g
-                      id="Icons"
-                      stroke="none"
-                      strokeWidth="1"
-                      fill="none"
-                      fillRule="evenodd"
-                    >
-                      <g
-                        id="Rounded"
-                        transform="translate(-619.000000, -2862.000000)"
-                      >
-                        <g
-                          id="Image"
-                          transform="translate(100.000000, 2626.000000)"
-                        >
-                          <g
-                            id="-Round-/-Image-/-navigate_next"
-                            transform="translate(510.000000, 230.000000)"
-                          >
-                            <g>
-                              <polygon
-                                id="Path"
-                                points="0 0 24 0 24 24 0 24"
-                              ></polygon>
-                              <path
-                                d="M9.31,6.71 C8.92,7.1 8.92,7.73 9.31,8.12 L13.19,12 L9.31,15.88 C8.92,16.27 8.92,16.9 9.31,17.29 C9.7,17.68 10.33,17.68 10.72,17.29 L15.31,12.7 C15.7,12.31 15.7,11.68 15.31,11.29 L10.72,6.7 C10.34,6.32 9.7,6.32 9.31,6.71 Z"
-                                id="🔹-Icon-Color"
-                                fill="#ffffff"
-                              ></path>
-                            </g>
-                          </g>
-                        </g>
-                      </g>
-                    </g>
-                  </svg>
-                  Previous
-                </button>
+                <button className="text-white">Previous</button>
               </div>
-
               <div
                 className="bg-primary w-24 md:w-28 h-10 rounded-lg flex items-center justify-center cursor-pointer"
                 onClick={handleNext}
               >
-                <button className="text-white flex items-center gap-2">
-                  Next
-                  <img src="/icons/next.svg" alt="next" className="w-4 h-4" />
-                </button>
+                <button className="text-white">Next</button>
               </div>
             </div>
           </div>
@@ -427,167 +277,53 @@ const UserForm = () => {
 
       case 3:
         return (
-          <div
-            className="otp-verification flex flex-wrap flex-col items-center justify-center mt-10"
-            // style={{ border: "2px solid black" }}
-          >
-            <div
-              className="contact-number flex flex-row md:w-2/5"
-              // style={{ border: "2px solid black" }}
-            >
+          <div className="otp-verification flex flex-col items-center justify-center mt-10">
+            <div className="contact-number flex flex-row md:w-2/5">
               <input
                 type="text"
                 name="countryCode"
-                className="border border-lightText border-r-0 text-md rounded-lg focus:border-primary focus:border-2 block w-1/5 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 outline-none md:w-1/5 md:h-12"
+                className="border border-lightText border-r-0 rounded-lg focus:border-primary block w-1/5 p-2.5 outline-none md:h-12"
                 value={formData.countryCode}
                 disabled
               />
               <input
                 type="text"
                 name="phoneNumber"
-                className="border border-lightText text-md rounded-lg focus:border-primary focus:border-2 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 outline-none md:w-full text-center  md:h-12"
+                className="border border-lightText rounded-lg focus:border-primary block w-full p-2.5 outline-none text-center md:h-12"
                 placeholder="Phone Number"
                 value={formData.phoneNumber}
                 onChange={handleChange}
               />
             </div>
-
             <h6
-              className=" cursor-pointer underline mt-3 text-primary"
-              id="sign-in-button"
+              className="cursor-pointer underline mt-3 text-primary"
               onClick={sendOtp}
             >
               Verify with SMS
             </h6>
-            <div id="recaptcha-container" className="mt-4"></div>
-            <br />
-            <div
-              className="otp flex flex-row w-full md:w-2/5 items-center justify-center"
-              // style={{ border: "2px solid black" }}
-            >
+            <div className="otp flex w-full md:w-2/5 items-center justify-center mt-4">
               <input
                 type="number"
                 name="otp"
-                className="border border-lightText text-md rounded-lg focus:border-primary focus:border-2 block text-center tracking-widest placeholder:tracking-normal p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 outline-none w-4/5  md:h-12"
+                className="border border-lightText rounded-lg focus:border-primary block text-center p-2.5 outline-none w-4/5 md:h-12"
                 value={formData.otp}
                 onChange={handleChange}
                 placeholder="Enter OTP"
               />
               <button
-                className="bg-primary text-center w-12 h-12 rounded-lg text-white cursor-pointer justify-center items-center ml-2"
-                type="submit"
+                className="bg-primary text-center w-12 h-12 rounded-lg text-white ml-2"
+                type="button"
                 onClick={verifyOtp}
               >
-                <svg
-                  viewBox="0 -0.5 25 25"
-                  className="w-[80%] h-[80%] ml-0.5"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  stroke="#ffffff"
-                >
-                  <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
-                  <g
-                    id="SVGRepo_tracerCarrier"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    stroke="#CCCCCC"
-                    strokeWidth="0.2"
-                  ></g>
-                  <g id="SVGRepo_iconCarrier">
-                    {" "}
-                    <path
-                      d="M5.5 12.5L10.167 17L19.5 8"
-                      stroke="#ffffff"
-                      strokeWidth="1.4000000000000001"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    ></path>{" "}
-                  </g>
-                </svg>
+                ✔
               </button>
             </div>
-            <br />
-            <br />
-            <br />
-            <br />
-            <div
-              className="actions w-full flex flex-row items-center justify-center align-baseline"
-              // style={{ border: "2px solid black" }}
-            >
-              {/* {Previos button} */}
+            <div className="flex justify-between w-full mt-8">
               <div
-                className="next bg-primary w-24 md:w-28 md:h-10 h-10 rounded-lg flex flex-row justify-evenly items-baseline cursor-pointer relative ml-2 mt-2"
+                className="bg-primary w-24 md:w-28 h-10 rounded-lg flex items-center justify-center cursor-pointer"
                 onClick={handlePrev}
-                // style={{ border: "2px solid black" }}
               >
-                <svg
-                  id="prev-icon"
-                  width="7px"
-                  height="12px"
-                  viewBox="0 0 7 12"
-                  version="1.1"
-                  xmlns="http://www.w3.org/2000/svg"
-                  style={{ transform: "" }}
-                >
-                  <title>navigate_next</title>
-                  <desc>Created with Sketch.</desc>
-                  <g
-                    id="Icons"
-                    stroke="none"
-                    strokeWidth="1"
-                    fill="none"
-                    fillRule="evenodd"
-                  >
-                    <g
-                      id="Rounded"
-                      transform="translate(-619.000000, -2862.000000)"
-                    >
-                      <g
-                        id="Image"
-                        transform="translate(100.000000, 2626.000000)"
-                      >
-                        <g
-                          id="-Round-/-Image-/-navigate_next"
-                          transform="translate(510.000000, 230.000000)"
-                        >
-                          <g>
-                            <polygon
-                              id="Path"
-                              points="0 0 24 0 24 24 0 24"
-                            ></polygon>
-                            <path
-                              d="M9.31,6.71 C8.92,7.1 8.92,7.73 9.31,8.12 L13.19,12 L9.31,15.88 C8.92,16.27 8.92,16.9 9.31,17.29 C9.7,17.68 10.33,17.68 10.72,17.29 L15.31,12.7 C15.7,12.31 15.7,11.68 15.31,11.29 L10.72,6.7 C10.34,6.32 9.7,6.32 9.31,6.71 Z"
-                              id="🔹-Icon-Color"
-                              fill="#ffffff"
-                            ></path>
-                          </g>
-                        </g>
-                      </g>
-                    </g>
-                  </g>
-                </svg>
-                <button
-                  className=" w-16 h-full text-[#fff]"
-                  // style={{ border: "2px solid black" }}
-                >
-                  Previous
-                </button>
-              </div>
-              {/* Submit button */}
-              <div
-                className=" bg-primary w-24 md:w-28 md:h-10 h-10 rounded-lg flex flex-row justify-evenly items-baseline cursor-pointer relative mr-2 mt-2 ml-auto"
-
-                // style={{ border: "2px solid black" }}
-              >
-                <button
-                  className=" w-16 h-full text-[#fff]"
-                  type="submit"
-                  data-modal-target="popup-modal"
-                  data-modal-toggle="popup-modal"
-                  // style={{ border: "2px solid black" }}
-                >
-                  Submit
-                </button>
+                <button className="text-white">Previous</button>
               </div>
             </div>
           </div>
@@ -597,11 +333,7 @@ const UserForm = () => {
     }
   };
 
-  return (
-    <form className=" sm:w-full flex flex-col" onSubmit={handleSubmit}>
-      {renderFormStep()}
-    </form>
-  );
+  return <form className="sm:w-full flex flex-col">{renderFormStep()}</form>;
 };
 
 export default UserForm;
