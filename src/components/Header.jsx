@@ -44,6 +44,7 @@ const Header = () => {
     location.pathname === "/dashboard/service-history" ||
     location.pathname === "/dashboard/provider" ||
     location.pathname === "/dashboard/contractor" ||
+    location.pathname === "/dashboard/applicants" ||
     location.pathname === "/dashboard/post-job" ||
     location.pathname === "/dashboard/search-job" ||
     location.pathname === "/dashboard/request-service" ||

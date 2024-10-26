@@ -28,6 +28,7 @@ import ContractorSignIn from "./pages/ContractorSignIn";
 import ProviderDashboard from "./pages/ProviderDashoard";
 import SeekerDashboard from "./pages/SeekerDashboard";
 import ContractorDashboard from "./pages/ContractorDashboard";
+import ContractApplicants from "./pages/ContractApplicants";
 
 const loadingMarkup = (
   <div className="py-4 text-center">
@@ -70,6 +71,10 @@ function App() {
                 <Route
                   path="/dashboard/contractor"
                   element={<ContractorDashboard />}
+                />
+                <Route
+                  path="/dashboard/applicants"
+                  element={<ContractApplicants />}
                 />
                 <Route
                   path="request-service"
