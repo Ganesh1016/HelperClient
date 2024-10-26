@@ -7,6 +7,14 @@ export const dummyProviders = [
     rating: 5,
     price: 700,
     category: "Maid",
+    location: "Mumbai",
+    contactNumber: "9876543210",
+    pastWork: ["Residential cleaning", "Deep cleaning", "Office cleaning"],
+    reviews: [
+      "Excellent work, very thorough.",
+      "Friendly and professional.",
+      "Highly recommended!",
+    ],
   },
   {
     _id: "2",
@@ -16,6 +24,14 @@ export const dummyProviders = [
     rating: 4,
     price: 550,
     category: "Cook",
+    location: "Delhi",
+    contactNumber: "9123456780",
+    pastWork: ["Private chef", "Event catering", "Meal prep"],
+    reviews: [
+      "Great chef, loved the food!",
+      "Punctual and professional.",
+      "Would hire again.",
+    ],
   },
   {
     _id: "3",
@@ -25,6 +41,14 @@ export const dummyProviders = [
     rating: 3,
     price: 300,
     category: "Housekeeper",
+    location: "Chennai",
+    contactNumber: "9234567891",
+    pastWork: ["Housekeeping for hotels", "Private house cleaning"],
+    reviews: [
+      "Good work but needs supervision.",
+      "Affordable rates.",
+      "Satisfied with her work.",
+    ],
   },
   {
     _id: "4",
@@ -34,6 +58,14 @@ export const dummyProviders = [
     rating: 4,
     price: 600,
     category: "Back-office worker",
+    location: "Bengaluru",
+    contactNumber: "9345678912",
+    pastWork: ["Data entry", "Admin support", "Filing and organizing"],
+    reviews: [
+      "Very efficient and fast.",
+      "Reliable and punctual.",
+      "Good value for money.",
+    ],
   },
   {
     _id: "5",
@@ -43,6 +75,14 @@ export const dummyProviders = [
     rating: 5,
     price: 1200,
     category: "Personal Assistant",
+    location: "Hyderabad",
+    contactNumber: "9456789123",
+    pastWork: ["Executive PA", "Travel arrangements", "Scheduling meetings"],
+    reviews: [
+      "Excellent at organizing!",
+      "Makes life so much easier.",
+      "Very professional.",
+    ],
   },
   {
     _id: "6",
@@ -52,6 +92,14 @@ export const dummyProviders = [
     rating: 2,
     price: 400,
     category: "Data entry",
+    location: "Pune",
+    contactNumber: "9567891234",
+    pastWork: ["Basic data entry", "Online research"],
+    reviews: [
+      "Work was okay, a bit slow.",
+      "Could improve in speed.",
+      "Affordable service.",
+    ],
   },
   {
     _id: "7",
@@ -61,6 +109,14 @@ export const dummyProviders = [
     rating: 4,
     price: 500,
     category: "Babysitter",
+    location: "Kolkata",
+    contactNumber: "9678912345",
+    pastWork: ["Babysitting toddlers", "Overnight nanny"],
+    reviews: [
+      "Very caring and attentive.",
+      "Kids love her!",
+      "Dependable and friendly.",
+    ],
   },
   {
     _id: "8",
@@ -70,6 +126,14 @@ export const dummyProviders = [
     rating: 3,
     price: 750,
     category: "Store assistant",
+    location: "Mumbai",
+    contactNumber: "9789123456",
+    pastWork: ["Stock management", "Customer service"],
+    reviews: [
+      "Helpful and organized.",
+      "Good with inventory.",
+      "Needs to improve on speed.",
+    ],
   },
   {
     _id: "9",
@@ -79,6 +143,14 @@ export const dummyProviders = [
     rating: 5,
     price: 900,
     category: "Cook",
+    location: "Delhi",
+    contactNumber: "9891234567",
+    pastWork: ["Family chef", "Healthy meal prep"],
+    reviews: [
+      "Amazing chef!",
+      "Delicious and healthy meals.",
+      "Very professional.",
+    ],
   },
   {
     _id: "10",
@@ -88,5 +160,13 @@ export const dummyProviders = [
     rating: 4,
     price: 650,
     category: "Maid",
+    location: "Ahmedabad",
+    contactNumber: "9901234567",
+    pastWork: ["House cleaning", "Window cleaning"],
+    reviews: [
+      "Great job on cleaning.",
+      "Thorough and efficient.",
+      "Highly recommended.",
+    ],
   },
 ];
