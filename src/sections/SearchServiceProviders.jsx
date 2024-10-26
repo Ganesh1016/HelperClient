@@ -1,410 +1,201 @@
 import { useState, useEffect } from "react";
 import ServicesSearchResult from "../components/ServicesSearchResult";
+import {
+  IconButton,
+  Dialog,
+  DialogHeader,
+  DialogBody,
+  Checkbox,
+} from "@material-tailwind/react";
+import { dummyProviders } from "../config";
 
 const SearchServiceProviders = () => {
   const [selectedRatings, setSelectedRatings] = useState([]);
-  const [serviceProviders, setServiceProviders] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [serviceProviders, setServiceProviders] = useState(dummyProviders);
+  const [filteredProviders, setFilteredProviders] = useState(dummyProviders);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedGender, setSelectedGender] = useState("");
+  const [selectedPriceRange, setSelectedPriceRange] = useState("");
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+
+  const ratings = [1, 2, 3, 4, 5];
+  const genders = ["Male", "Female", "Others"];
+  const priceRanges = ["< ₹500", "₹500 - ₹1000", "> ₹1000"];
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch(
-          "http://localhost:3000/api/service-providers"
-        );
-        const data = await response.json();
-        // console.log(data);
-        setServiceProviders(data);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        setLoading(false);
-      }
+    const filterProviders = () => {
+      const filtered = serviceProviders.filter((provider) => {
+        const matchesSearch = provider.name
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase());
+        const matchesGender =
+          !selectedGender || provider.gender === selectedGender;
+        const matchesRatings =
+          selectedRatings.length === 0 ||
+          selectedRatings.includes(provider.rating);
+        const matchesPrice =
+          selectedPriceRange === "" ||
+          (selectedPriceRange === "< ₹500" && provider.price < 500) ||
+          (selectedPriceRange === "₹500 - ₹1000" &&
+            provider.price >= 500 &&
+            provider.price <= 1000) ||
+          (selectedPriceRange === "> ₹1000" && provider.price > 1000);
+
+        return matchesSearch && matchesGender && matchesRatings && matchesPrice;
+      });
+      setFilteredProviders(filtered);
     };
 
-    fetchData();
-  }, []);
-
-  const categories = [
-    { id: 1, name: "All" },
-    { id: 2, name: "Maid" },
-    { id: 3, name: "Cook" },
-    { id: 4, name: "Housekeeper" },
-    { id: 5, name: "Back-office worker" },
-    { id: 6, name: "Personal Assitant" },
-    { id: 7, name: "Data entry" },
-    { id: 8, name: "Baby sister" },
-    { id: 9, name: "Store assistant" },
-    // Add more categories as needed
-  ];
-
-  // Search by ratings functionality
-
-  const ratings = [
-    { id: 1, name: "⭐" },
-    { id: 2, name: "⭐⭐" },
-    { id: 3, name: "⭐⭐⭐" },
-    { id: 4, name: "⭐⭐⭐⭐" },
-    { id: 5, name: "⭐⭐⭐⭐⭐" },
-  ];
+    filterProviders();
+  }, [
+    searchTerm,
+    selectedGender,
+    selectedPriceRange,
+    selectedRatings,
+    serviceProviders,
+  ]);
 
   const handleCheckboxChange = (value) => {
-    const index = selectedRatings.indexOf(value);
-
-    if (index === -1) {
-      // Rating not in the list, add it
-      setSelectedRatings([...selectedRatings, value]);
-    } else {
-      // Rating already in the list, remove it
-      const updatedRatings = [...selectedRatings];
-      updatedRatings.splice(index, 1);
-      setSelectedRatings(updatedRatings);
-    }
+    setSelectedRatings((prevRatings) =>
+      prevRatings.includes(value)
+        ? prevRatings.filter((rating) => rating !== value)
+        : [...prevRatings, value]
+    );
   };
 
-  // useEffect(() => {
-  //   const fetchDataBasedOnRatings = async () => {
-  //     try {
-  //       // Construct the API endpoint with selected ratings as query parameters
-  //       const apiUrl = `https://helper-two.vercel.app/api/your-endpoint?ratings=${selectedRatings.join(
-  //         ","
-  //       )}`;
+  const handleSearchChange = (e) => setSearchTerm(e.target.value);
+  const toggleFilterModal = () => setIsFilterModalOpen((prev) => !prev);
 
-  //       const response = await fetch(apiUrl);
-  //       const data = await response.json();
-
-  //       // Handle the fetched data as needed
-  //       console.log(data);
-  //     } catch (error) {
-  //       console.error("Error fetching data:", error);
-  //     }
-  //   };
-
-  //   fetchDataBasedOnRatings();
-  // }, [selectedRatings]);
-
-  // const [selectedFilters, setSelectedFilters] = useState([]);
-
-  // const handleCheckboxChange = (categoryId) => {
-  //   // Handle checkbox change if needed
-  //   console.log(`Checkbox with id ${categoryId} changed`);
-  //   // For now, just toggle the selected filters
-  //   setSelectedFilters((prevFilters) => {
-  //     if (prevFilters.includes(categoryId)) {
-  //       return prevFilters.filter((filter) => filter !== categoryId);
-  //     } else {
-  //       return [...prevFilters, categoryId];
-  //     }
-  //   });
-  // };
-
-  // const handleClearAll = () => {
-  //   // Clear all selected filters
-  //   setSelectedFilters([]);
-  // };
-
-  if (loading) {
-    return <div>Loading...</div>;
-  }
   return (
-    <div
-      className="services-table w-full h-full"
-      // style={{ border: "2px solid black" }}
-    >
-      <div
-        className="filters-row w-full flex flex-row"
-        // style={{ border: "2px solid black" }}
-      >
-        <form
-          className="flex items-center w-2/6"
-          id="services-search"
-          // style={{ border: "2px solid black" }}
+    <div className="p-4 w-full min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="text-2xl font-bold text-indigo-600">
+          Search Service Providers
+        </h1>
+        <IconButton
+          onClick={toggleFilterModal}
+          color="indigo"
+          variant="outlined"
         >
-          <div className="relative w-full">
-            <input
-              type="text"
-              id="simple-search"
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-4 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              placeholder="Search services..."
-              required
-            />
-          </div>
-          <button
-            type="submit"
-            className="p-2.5 ms-2 text-sm font-medium bg-primary text-white bg-blue-700 rounded-lg border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-          >
-            <svg
-              className="w-4 h-4 text-body"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 20 20"
-            >
-              <path
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
-              />
-            </svg>
-            <span className="sr-only">Search</span>
-          </button>
-        </form>
-
-        {/* Category dropdown button */}
-        <button
-          id="dropdownCategoryBgHoverButton"
-          data-dropdown-toggle="dropdownCategoryBgHover"
-          className="text-darkPrimary bg-[#fff] border-[#2f2c2c] shadow-sm focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 ml-4 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-          type="button"
-        >
-          Category
           <svg
-            className="w-2.5 h-2.5 ms-3"
-            aria-hidden="true"
+            fill="#521782"
+            height="20px"
+            width="20px"
+            version="1.1"
+            id="Layer_1"
             xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 10 6"
+            viewBox="0 0 300.906 300.906"
+            xmlSpace="preserve"
+            stroke="#521782"
           >
-            <path
-              stroke="currentColor"
+            <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+            <g
+              id="SVGRepo_tracerCarrier"
               strokeLinecap="round"
               strokeLinejoin="round"
-              strokeWidth="2"
-              d="m1 1 4 4 4-4"
-            />
+            ></g>
+            <g id="SVGRepo_iconCarrier">
+              {" "}
+              <g>
+                {" "}
+                <g>
+                  {" "}
+                  <path d="M288.953,0h-277c-5.522,0-10,4.478-10,10v49.531c0,5.522,4.478,10,10,10h12.372l91.378,107.397v113.978 c0,3.688,2.03,7.076,5.281,8.816c1.479,0.792,3.101,1.184,4.718,1.184c1.94,0,3.875-0.564,5.548-1.68l49.5-33 c2.782-1.854,4.453-4.977,4.453-8.32v-80.978l91.378-107.397h12.372c5.522,0,10-4.478,10-10V10C298.953,4.478,294.476,0,288.953,0 z M167.587,166.77c-1.539,1.809-2.384,4.105-2.384,6.48v79.305l-29.5,19.666V173.25c0-2.375-0.845-4.672-2.384-6.48L50.585,69.531 h199.736L167.587,166.77z M278.953,49.531h-257V20h257V49.531z"></path>{" "}
+                </g>{" "}
+              </g>{" "}
+            </g>
           </svg>
-        </button>
-
-        {/* Category dropdown div */}
-        <div
-          id="dropdownCategoryBgHover"
-          className="z-10 hidden w-48 h-64 overflow-auto bg-body rounded-lg shadow dark:bg-gray-700"
-        >
-          <ul
-            className="p-3 space-y-1 text-sm text-gray-700 dark:text-gray-200"
-            aria-labelledby="dropdownCategoryBgHoverButton"
-          >
-            {categories.map((category) => (
-              <li
-                key={category.id}
-                className="hover:bg-[#e7e7e7] cursor-pointer"
-              >
-                <div className="flex items-center p-2 rounded cursor-pointer dark:hover:bg-gray-600">
-                  <input
-                    id={`checkbox-item-${category.id}`}
-                    type="checkbox"
-                    value={category.name}
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
-                    // onChange={() => handleCheckboxChange(category.id)}
-                  />
-                  <label
-                    htmlFor={`checkbox-item-${category.id}`}
-                    className="w-full ms-2 text-sm font-medium text-gray-900 rounded dark:text-gray-300 cursor-pointer"
-                  >
-                    {category.name}
-                  </label>
-                </div>
-              </li>
-            ))}
-          </ul>
-          {/* <button className="absolute z-10 bottom-0 left-1/2 transform -translate-x-1/2 w-3/4 h-fit bg-alert text-white p-2 rounded-lg focus:outline-none">
-            Clear all
-          </button> */}
-        </div>
-
-        {/* Ratings dropdown button */}
-        <button
-          id="dropdownRatingsBgHoverButton"
-          data-dropdown-toggle="dropdownRatingsBgHover"
-          className="text-darkPrimary bg-[#fff] border-[#2f2c2c] shadow-sm focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 ml-4 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-          type="button"
-        >
-          Ratings
-          <svg
-            className="w-2.5 h-2.5 ms-3"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 10 6"
-          >
-            <path
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="m1 1 4 4 4-4"
-            />
-          </svg>
-        </button>
-
-        {/* Ratings dropdown div */}
-        <div
-          id="dropdownRatingsBgHover"
-          className="z-10 hidden w-48 h-64 overflow-auto bg-body rounded-lg shadow dark:bg-gray-700"
-        >
-          <ul
-            className="p-3 space-y-1 text-sm text-gray-700 dark:text-gray-200"
-            aria-labelledby="dropdownRatingsBgHoverButton"
-          >
-            {ratings.map((rating) => (
-              <li key={rating.id} className="hover:bg-[#e7e7e7] cursor-pointer">
-                <div className="flex items-center p-2 rounded cursor-pointer dark:hover:bg-gray-600">
-                  <input
-                    id={`checkbox-item-${rating.id}`}
-                    type="checkbox"
-                    value={rating.name}
-                    checked={selectedRatings.includes(rating.name)}
-                    onChange={() => handleCheckboxChange(rating.name)}
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
-                  />
-                  <label
-                    htmlFor={`checkbox-item-${rating.id}`}
-                    className="w-full ms-2 text-sm font-medium text-gray-900 rounded dark:text-gray-300 cursor-pointer"
-                  >
-                    {rating.name}
-                  </label>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* Pricing dropdown button */}
-        <button
-          id="dropdownPricingBgHoverButton"
-          data-dropdown-toggle="dropdownPricingBgHover"
-          className="text-darkPrimary bg-[#fff] border-[#2f2c2c] shadow-sm focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 ml-4 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-          type="button"
-        >
-          Pricing
-          <svg
-            className="w-2.5 h-2.5 ms-3"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 10 6"
-          >
-            <path
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="m1 1 4 4 4-4"
-            />
-          </svg>
-        </button>
-
-        {/* Category dropdown div */}
-        <div
-          id="dropdownPricingBgHover"
-          className="z-10 hidden w-48 h-64 overflow-auto bg-body rounded-lg shadow dark:bg-gray-700"
-        >
-          <ul
-            className="p-3 space-y-1 text-sm text-gray-700 dark:text-gray-200"
-            aria-labelledby="dropdownPricingBgHoverButton"
-          >
-            {categories.map((category) => (
-              <li
-                key={category.id}
-                className="hover:bg-[#e7e7e7] cursor-pointer"
-              >
-                <div className="flex items-center p-2 rounded cursor-pointer dark:hover:bg-gray-600">
-                  <input
-                    id={`checkbox-item-${category.id}`}
-                    type="checkbox"
-                    value={category.name}
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
-                    // onChange={() => handleCheckboxChange(category.id)}
-                  />
-                  <label
-                    htmlFor={`checkbox-item-${category.id}`}
-                    className="w-full ms-2 text-sm font-medium text-gray-900 rounded dark:text-gray-300 cursor-pointer"
-                  >
-                    {category.name}
-                  </label>
-                </div>
-              </li>
-            ))}
-          </ul>
-          {/* <button className="absolute z-10 bottom-0 left-1/2 transform -translate-x-1/2 w-3/4 h-fit bg-alert text-white p-2 rounded-lg focus:outline-none">
-            Clear all
-          </button> */}
-        </div>
-
-        {/* Gender dropdown button */}
-        <button
-          id="dropdownGenderBgHoverButton"
-          data-dropdown-toggle="dropdownGenderBgHover"
-          className="text-darkPrimary bg-[#fff] border-[#2f2c2c] shadow-sm focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 ml-4 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-          type="button"
-        >
-          Gender
-          <svg
-            className="w-2.5 h-2.5 ms-3"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 10 6"
-          >
-            <path
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="m1 1 4 4 4-4"
-            />
-          </svg>
-        </button>
-
-        {/* Gender dropdown div */}
-        <div
-          id="dropdownGenderBgHover"
-          className="z-10 hidden w-48 h-64 overflow-auto bg-body rounded-lg shadow dark:bg-gray-700"
-        >
-          <ul
-            className="p-3 space-y-1 text-sm text-gray-700 dark:text-gray-200"
-            aria-labelledby="dropdownGenderBgHoverButton"
-          >
-            {categories.map((category) => (
-              <li
-                key={category.id}
-                className="hover:bg-[#e7e7e7] cursor-pointer"
-              >
-                <div className="flex items-center p-2 rounded cursor-pointer dark:hover:bg-gray-600">
-                  <input
-                    id={`checkbox-item-${category.id}`}
-                    type="checkbox"
-                    value={category.name}
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
-                    // onChange={() => handleCheckboxChange(category.id)}
-                  />
-                  <label
-                    htmlFor={`checkbox-item-${category.id}`}
-                    className="w-full ms-2 text-sm font-medium text-gray-900 rounded dark:text-gray-300 cursor-pointer"
-                  >
-                    {category.name}
-                  </label>
-                </div>
-              </li>
-            ))}
-          </ul>
-          {/* <button className="absolute z-10 bottom-0 left-1/2 transform -translate-x-1/2 w-3/4 h-fit bg-alert text-white p-2 rounded-lg focus:outline-none">
-            Clear all
-          </button> */}
-        </div>
+        </IconButton>
       </div>
 
-      {/* Search results container */}
-      <div
-        className="search-results pt-3 h-full flex flex-col items-center overflow-scroll pb-2 mt-2"
-        // style={{ border: "2px solid black" }}
-      >
-        {serviceProviders.map((provider) => (
+      {/* Search Bar */}
+      <div className="flex flex-col sm:flex-row items-center gap-4 mb-6">
+        <input
+          type="text"
+          placeholder="Search services..."
+          value={searchTerm}
+          onChange={handleSearchChange}
+          className="w-full p-3 border rounded-lg focus:border-indigo-600 focus:ring focus:ring-indigo-200"
+        />
+      </div>
+
+      {/* Service Provider Listings with scroll */}
+      <div className="max-h-[500px] overflow-y-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {filteredProviders.map((provider) => (
           <ServicesSearchResult key={provider._id} provider={provider} />
         ))}
+        {filteredProviders.length === 0 && (
+          <div className="text-center text-gray-600 col-span-full">
+            No service providers match your search criteria.
+          </div>
+        )}
       </div>
+
+      {/* Filter Modal */}
+      <Dialog
+        open={isFilterModalOpen}
+        handler={toggleFilterModal}
+        size="lg"
+        className="bg-gray-50"
+      >
+        <DialogHeader>Filter Options</DialogHeader>
+        <DialogBody className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          {/* Gender Filter */}
+          <div>
+            <h3 className="font-semibold mb-2">Gender</h3>
+            <select
+              value={selectedGender}
+              onChange={(e) => setSelectedGender(e.target.value)}
+              className="w-full p-2 border rounded-lg"
+            >
+              <option value="">All Genders</option>
+              {genders.map((gender) => (
+                <option key={gender} value={gender}>
+                  {gender}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Price Range Filter */}
+          <div>
+            <h3 className="font-semibold mb-2">Price Range</h3>
+            <select
+              value={selectedPriceRange}
+              onChange={(e) => setSelectedPriceRange(e.target.value)}
+              className="w-full p-2 border rounded-lg"
+            >
+              <option value="">Any Price</option>
+              {priceRanges.map((range) => (
+                <option key={range} value={range}>
+                  {range}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Ratings Filter */}
+          <div>
+            <h3 className="font-semibold mb-2">Ratings</h3>
+            <div className="flex flex-wrap gap-3">
+              {ratings.map((rating) => (
+                <label key={rating} className="flex items-center space-x-2">
+                  <Checkbox
+                    color="indigo"
+                    value={rating}
+                    checked={selectedRatings.includes(rating)}
+                    onChange={() => handleCheckboxChange(rating)}
+                  />
+                  <span className="text-sm">{`${"⭐".repeat(
+                    rating
+                  )} & up`}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        </DialogBody>
+      </Dialog>
     </div>
   );
 };
