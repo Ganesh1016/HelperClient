@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Mic, MicOff } from "lucide-react";
+import axios from "axios";
 
 const VoiceSignUp = () => {
   const [isRecording, setIsRecording] = useState(false);
@@ -16,7 +17,7 @@ const VoiceSignUp = () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       mediaRecorder.current = new MediaRecorder(stream);
-      chunksRef.current = []; // Clear previous chunks
+      chunksRef.current = [];
 
       mediaRecorder.current.ondataavailable = (e) => {
         if (e.data.size > 0) {
@@ -26,16 +27,13 @@ const VoiceSignUp = () => {
 
       mediaRecorder.current.onstop = async () => {
         const audioBlob = new Blob(chunksRef.current, { type: "audio/wav" });
-        console.log("Recording stopped, sending audio to server...");
         await sendAudioToServer(audioBlob);
       };
 
       mediaRecorder.current.start();
       setIsRecording(true);
       setError("");
-      console.log("Recording started");
 
-      // Simulate audio visualization with random data
       animationInterval.current = setInterval(() => {
         setAudioData((prev) =>
           prev.map(() => Math.floor(Math.random() * 40 + 2))
@@ -43,7 +41,6 @@ const VoiceSignUp = () => {
       }, 100);
     } catch (err) {
       setError("Error accessing microphone: " + err.message);
-      console.error("Error accessing microphone:", err.message);
     }
   };
 
@@ -55,36 +52,38 @@ const VoiceSignUp = () => {
     clearInterval(animationInterval.current);
     setIsRecording(false);
     setAudioData(new Array(20).fill(2));
-    console.log("Recording stopped");
   };
 
   const sendAudioToServer = async (audioBlob) => {
     setIsLoading(true);
-    console.log("Sending audio to server...");
     try {
       const formData = new FormData();
       formData.append("audio", audioBlob, "recording.wav");
 
-      const response = await fetch("http://127.0.0.1:8080/api/transcribe", {
-        method: "POST",
-        body: formData,
-      });
+      // Use axios for the POST request
+      const response = await axios.post(
+        "http://localhost:5000/api/transcribe",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
 
-      console.log("Server response status:", response.status);
-
-      if (!response.ok) {
-        throw new Error(`Server returned ${response.status}`);
-      }
-
-      const data = await response.json();
-      setTranscription(data.transcription);
-      console.log("Transcription received:", data.transcription);
+      setTranscription(response.data.transcription);
+      playText(response.data.transcription); // Call TTS function here
     } catch (err) {
       setError("Error sending audio to server: " + err.message);
-      console.error("Error sending audio to server:", err.message);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // TTS function to play the transcription
+  const playText = (text) => {
+    const utterance = new SpeechSynthesisUtterance(text);
+    speechSynthesis.speak(utterance);
   };
 
   useEffect(() => {
@@ -105,7 +104,6 @@ const VoiceSignUp = () => {
           <p className="text-gray-600">Tap the microphone to start speaking</p>
         </div>
 
-        {/* Voice visualization */}
         <div className="flex items-center justify-center h-24 mb-8">
           <div className="flex items-end space-x-1">
             {audioData.map((height, index) => (
@@ -121,7 +119,6 @@ const VoiceSignUp = () => {
           </div>
         </div>
 
-        {/* Microphone button */}
         <div className="flex justify-center">
           <button
             onClick={isRecording ? stopRecording : startRecording}
@@ -139,22 +136,18 @@ const VoiceSignUp = () => {
           </button>
         </div>
 
-        {/* Status text */}
         <p className="text-center mt-4 text-gray-600">
           {isRecording ? "Listening..." : "Ready to listen"}
         </p>
 
-        {/* Loading spinner */}
         {isLoading && (
           <div className="flex justify-center mt-4">
             <span className="text-gray-500">Transcribing...</span>
           </div>
         )}
 
-        {/* Display error */}
         {error && <p className="text-center mt-4 text-red-500">{error}</p>}
 
-        {/* Display transcription */}
         {transcription && (
           <div className="mt-4 p-4 bg-gray-100 rounded-md">
             <h3 className="font-semibold mb-2">Transcription:</h3>
