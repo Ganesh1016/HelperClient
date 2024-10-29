@@ -39,6 +39,7 @@ const Header = () => {
     location.pathname === "/sign-up/postjob" ||
     location.pathname === "/sign-up/findjob" ||
     location.pathname === "/sign-up/contractor" ||
+    location.pathname === "/sign-up/voice" ||
     location.pathname === "/signin" ||
     location.pathname === "/dashboard" ||
     location.pathname === "/dashboard/service-history" ||

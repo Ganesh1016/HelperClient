@@ -30,6 +30,7 @@ import SeekerDashboard from "./pages/SeekerDashboard";
 import ContractorDashboard from "./pages/ContractorDashboard";
 import ContractApplicants from "./pages/ContractApplicants";
 import DesktopRestrictionModal from "./components/DesktopRestrictionModal ";
+import VoiceSignUp from "./pages/VoiceSignUp";
 
 const loadingMarkup = (
   <div className="py-4 text-center">
@@ -78,6 +79,7 @@ function App() {
                   path="/sign-up/contractor"
                   element={<ContractorSignIn />}
                 />
+                <Route path="/sign-up/voice" element={<VoiceSignUp />} />
               </Route>
 
               <Route path="/userform" element={<UserForm />} />
